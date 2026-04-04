@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Registro de Campo - Suicídio</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d6efd">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<style>
+body { font-family: Arial; padding: 15px; background:#f5f5f5;}
+h2 { margin-top:20px; }
+input, select, textarea { width:100%; padding:10px; margin:5px 0; }
+button { width:100%; padding:15px; margin-top:10px; background:#0d6efd; color:white; border:none; font-size:16px; }
+#resultado { height:250px; }
+</style>
+</head>
+
+<body>
+
+<h2>📋 Dados Operacionais</h2>
+
+<input id="horaAcionamento" placeholder="Hora do acionamento">
+<input id="protocolo" placeholder="Protocolo CIODS">
+<input id="horaChegada" placeholder="Hora da chegada">
+<input id="horaFim" placeholder="Hora do fim da perícia">
+
+<select id="mesmoDia">
+<option>Finalizada no mesmo dia</option>
+<option>Finalizada em data diversa</option>
+</select>
+
+<input id="pmPatente" placeholder="Patente do PM">
+<input id="pmNome" placeholder="Nome do PM">
+<input id="pmMat" placeholder="Matrícula do PM">
+
+<select id="preservado">
+<option>Local preservado</option>
+<option>Local não preservado</option>
+</select>
+
+<input id="delegado" placeholder="Nome do delegado">
+<input id="matDelegado" placeholder="Matrícula do delegado">
+<input id="circunscricao" placeholder="Circunscrição">
+
+
+<h2>📍 Local</h2>
+<input id="data" placeholder="Data da perícia">
+<input id="endereco" placeholder="Endereço">
+<input id="gps" placeholder="GPS">
+
+<input id="alvenaria" placeholder="Tipo de alvenaria">
+<input id="piso" placeholder="Tipo de piso">
+<input id="telha" placeholder="Tipo de telha">
+<input id="reboco" placeholder="Tipo de reboco">
+
+<input id="comodos" placeholder="Cômodos">
+<input id="ambiente" placeholder="Ambiente do cadáver">
+
+<textarea id="luta" placeholder="Sinais de luta"></textarea>
+<textarea id="arrombamento" placeholder="Arrombamento"></textarea>
+<textarea id="invasao" placeholder="Invasão"></textarea>
+
+<h2>⚙️ Dinâmica</h2>
+<select id="suspensao">
+<option>Completa</option>
+<option>Incompleta</option>
+</select>
+
+<input id="corda" placeholder="Tipo de corda">
+<input id="suporte" placeholder="Suporte utilizado">
+<input id="localNo" placeholder="Local do nó">
+
+<h2>🧍 Vítima</h2>
+<input id="vitima" placeholder="Nome da vítima">
+<select id="sexo">
+<option>masculino</option>
+<option>feminino</option>
+</select>
+
+<input id="docTipo" placeholder="Tipo de documento">
+<input id="docNumero" placeholder="Número do documento">
+
+<input id="altura" placeholder="Altura">
+<input id="traje" placeholder="Traje">
+
+<h2>📏 Medidas</h2>
+<input id="alturaNo" placeholder="Altura do nó">
+<input id="alturaVitima" placeholder="Altura da vítima">
+<input id="alturaSuporte" placeholder="Altura do suporte">
+
+<button onclick="gerar()">📋 GERAR REGISTRO</button>
+<button onclick="gerarPDF()">📄 GERAR PDF</button>
+
+<textarea id="resultado"></textarea>
+
+<script>
+function gerar(){
+
+const texto = `
+REGISTRO DE INFORMAÇÕES DE CAMPO
+
+Dados operacionais:
+- Delegado: ${delegado.value} (mat. ${matDelegado.value})
+- Circunscrição: ${circunscricao.value}
+- Acionamento: ${horaAcionamento.value} | Protocolo CIODS: ${protocolo.value}
+- Chegada: ${horaChegada.value} | Término: ${horaFim.value}
+- Situação temporal: ${mesmoDia.value}
+- Preservação do local: ${preservado.value}
+- Responsável isolamento: ${pmPatente.value} ${pmNome.value} (mat. ${pmMat.value})
+
+Local:
+- Endereço: ${endereco.value}
+- Coordenadas: ${gps.value}
+- Data: ${data.value}
+- Estrutura: alvenaria ${alvenaria.value}, piso ${piso.value}, telha ${telha.value}, reboco ${reboco.value}
+- Cômodos: ${comodos.value}
+- Ambiente do cadáver: ${ambiente.value}
+
+Vestígios e condições:
+- Sinais de luta: ${luta.value}
+- Arrombamento: ${arrombamento.value}
+- Invasão: ${invasao.value}
+
+Dinâmica observada:
+- Tipo de suspensão: ${suspensao.value}
+- Tipo de corda: ${corda.value}
+- Suporte: ${suporte.value}
+- Local do nó: ${localNo.value}
+
+Vítima:
+- Nome: ${vitima.value}
+- Sexo: ${sexo.value}
+- Documento: ${docTipo.value} nº ${docNumero.value}
+- Altura: ${altura.value}
+- Traje: ${traje.value}
+
+Medições:
+- Altura do nó: ${alturaNo.value}
+- Altura da vítima: ${alturaVitima.value}
+- Altura do suporte: ${alturaSuporte.value}
+`;
+
+document.getElementById("resultado").value = texto;
+}
+
+function gerarPDF(){
+gerar();
+
+const texto = document.getElementById("resultado").value;
+
+const win = window.open('', '', 'width=800,height=600');
+win.document.write(`
+<html>
+<head>
+<title>Registro</title>
+<style>
+body { font-family: Arial; padding: 30px; }
+</style>
+</head>
+<body>
+<pre>${texto}</pre>
+</body>
+</html>
+`);
+win.document.close();
+win.print();
+}
+
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.register('sw.js');
+}
+</script>
+
+</body>
+</html>
