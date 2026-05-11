@@ -7,30 +7,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="manifest" href="manifest.json">
+
 <meta name="theme-color" content="#0d6efd">
 <meta name="apple-mobile-web-app-capable" content="yes">
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
-body {
-  font-family: Arial;
-  padding: 15px;
+
+body{
+  font-family:Arial;
+  padding:15px;
   background:#f5f5f5;
 }
 
-h2 {
+h2{
   margin-top:20px;
 }
 
-input, select, textarea {
+input,
+select,
+textarea{
   width:100%;
   padding:10px;
   margin:5px 0;
   box-sizing:border-box;
   border-radius:6px;
   border:1px solid #ccc;
+  font-size:16px;
 }
 
-button {
+textarea{
+  min-height:80px;
+}
+
+button{
   width:100%;
   padding:15px;
   margin-top:10px;
@@ -41,22 +52,16 @@ button {
   border-radius:8px;
 }
 
-.btn-limpar {
+.btn-limpar{
   background:#6c757d;
 }
 
-footer {
-  text-align:center;
-  margin-top:30px;
-  color:gray;
-  font-size:12px;
-}
 </style>
 </head>
 
 <body>
 
-<h2>📋 Dados Operacionais</h2>
+<h2>Dados Operacionais</h2>
 
 <input id="horaAcionamento" placeholder="Hora do acionamento">
 <input id="protocolo" placeholder="Protocolo CIODS">
@@ -81,7 +86,7 @@ footer {
 <input id="matDelegado" placeholder="Matrícula do delegado">
 <input id="circunscricao" placeholder="Circunscrição">
 
-<h2>📍 Local</h2>
+<h2>Local</h2>
 
 <input id="data" placeholder="Data da perícia">
 <input id="endereco" placeholder="Endereço">
@@ -108,7 +113,7 @@ footer {
 <textarea id="arrombamento" placeholder="Arrombamento"></textarea>
 <textarea id="invasao" placeholder="Invasão"></textarea>
 
-<h2>⚙️ Dinâmica</h2>
+<h2>Dinâmica</h2>
 
 <select id="suspensao">
 <option>Completa</option>
@@ -119,7 +124,7 @@ footer {
 <input id="suporte" placeholder="Suporte utilizado">
 <input id="localNo" placeholder="Local do nó">
 
-<h2>🧍 Vítima</h2>
+<h2>Vítima</h2>
 
 <input id="vitima" placeholder="Nome da vítima">
 
@@ -134,156 +139,252 @@ footer {
 <input id="altura" placeholder="Altura">
 <input id="traje" placeholder="Traje">
 
-<h2>📏 Medidas</h2>
+<h2>Medidas</h2>
 
 <input id="alturaNo" placeholder="Altura do nó">
 <input id="alturaVitima" placeholder="Altura da vítima">
 <input id="alturaSuporte" placeholder="Altura do suporte">
 
-<button onclick="gerarPDF()">📄 GERAR PDF</button>
+<button onclick="gerarPDF()">
+📄 GERAR PDF
+</button>
 
 <button class="btn-limpar" onclick="limparDados()">
 🗑️ LIMPAR DADOS
 </button>
 
-<footer>
-© Perito Meirere
-</footer>
-
 <script>
 
 /* =========================
-   SALVAMENTO AUTOMÁTICO
+SALVAMENTO AUTOMÁTICO
 ========================= */
 
-const campos = document.querySelectorAll("input, select, textarea");
+const campos = document.querySelectorAll(
+"input, select, textarea"
+);
 
 campos.forEach(campo => {
 
-  const valorSalvo = localStorage.getItem(campo.id);
+  const valorSalvo =
+  localStorage.getItem(campo.id);
 
-  if (valorSalvo !== null) {
+  if(valorSalvo !== null){
     campo.value = valorSalvo;
   }
 
   campo.addEventListener("input", () => {
-    localStorage.setItem(campo.id, campo.value);
+    localStorage.setItem(
+      campo.id,
+      campo.value
+    );
   });
 
 });
 
 /* =========================
-   GERAR TEXTO
+GERAR TEXTO
 ========================= */
 
-function gerar(){
+function gerarTexto(){
 
-const texto = `
+return `
 REGISTRO DE INFORMAÇÕES DE CAMPO - SUICÍDIO
 
-Dados operacionais:
-- Delegado: ${delegado.value} (mat. ${matDelegado.value})
-- Circunscrição: ${circunscricao.value}
-- Acionamento: ${horaAcionamento.value} | Protocolo CIODS: ${protocolo.value}
-- Chegada: ${horaChegada.value} | Término: ${horaFim.value}
-- Situação temporal: ${mesmoDia.value}
-- Preservação do local: ${preservado.value}
-- Responsável isolamento: ${pmPatente.value} ${pmNome.value} (mat. ${pmMat.value})
+DADOS OPERACIONAIS
 
-Local:
-- Endereço: ${endereco.value}
-- Coordenadas: ${gps.value}
-- Data: ${data.value}
-- Estrutura: alvenaria ${alvenaria.value}, piso ${piso.value}, telha ${telha.value}, reboco ${reboco.value}
+Delegado:
+${delegado.value}
+(mat. ${matDelegado.value})
 
-- Cômodos:
-Sala: ${salas.value}
-Quartos: ${quartos.value}
-Corredor: ${corredor.value}
-Cozinha: ${cozinha.value}
-Quintal: ${quintal.value}
-Terraço: ${terraco.value}
-Banheiro: ${banheiro.value}
-Garagem: ${garagem.value}
-Outros: ${outros_comodos.value}
+Circunscrição:
+${circunscricao.value}
 
-- Ambiente do cadáver: ${ambiente.value}
+Acionamento:
+${horaAcionamento.value}
 
-Vestígios e condições:
-- Sinais de luta: ${luta.value}
-- Arrombamento: ${arrombamento.value}
-- Invasão: ${invasao.value}
+Protocolo CIODS:
+${protocolo.value}
 
-Dinâmica observada:
-- Tipo de suspensão: ${suspensao.value}
-- Tipo de corda: ${corda.value}
-- Suporte: ${suporte.value}
-- Local do nó: ${localNo.value}
+Chegada:
+${horaChegada.value}
 
-Vítima:
-- Nome: ${vitima.value}
-- Sexo: ${sexo.value}
-- Documento: ${docTipo.value} nº ${docNumero.value}
-- Altura: ${altura.value}
-- Traje: ${traje.value}
+Término:
+${horaFim.value}
 
-Medições:
-- Altura do nó: ${alturaNo.value}
-- Altura da vítima: ${alturaVitima.value}
-- Altura do suporte: ${alturaSuporte.value}
+Situação temporal:
+${mesmoDia.value}
+
+Preservação:
+${preservado.value}
+
+Responsável isolamento:
+${pmPatente.value} ${pmNome.value}
+(mat. ${pmMat.value})
+
+LOCAL
+
+Endereço:
+${endereco.value}
+
+Coordenadas:
+${gps.value}
+
+Data:
+${data.value}
+
+Estrutura:
+Alvenaria ${alvenaria.value},
+piso ${piso.value},
+telha ${telha.value},
+reboco ${reboco.value}
+
+Cômodos:
+
+Sala:
+${salas.value}
+
+Quartos:
+${quartos.value}
+
+Corredor:
+${corredor.value}
+
+Cozinha:
+${cozinha.value}
+
+Quintal:
+${quintal.value}
+
+Terraço:
+${terraco.value}
+
+Banheiro:
+${banheiro.value}
+
+Garagem:
+${garagem.value}
+
+Outros:
+${outros_comodos.value}
+
+Ambiente do cadáver:
+${ambiente.value}
+
+VESTÍGIOS E CONDIÇÕES
+
+Sinais de luta:
+${luta.value}
+
+Arrombamento:
+${arrombamento.value}
+
+Invasão:
+${invasao.value}
+
+DINÂMICA OBSERVADA
+
+Tipo de suspensão:
+${suspensao.value}
+
+Tipo de corda:
+${corda.value}
+
+Suporte:
+${suporte.value}
+
+Local do nó:
+${localNo.value}
+
+VÍTIMA
+
+Nome:
+${vitima.value}
+
+Sexo:
+${sexo.value}
+
+Documento:
+${docTipo.value}
+nº ${docNumero.value}
+
+Altura:
+${altura.value}
+
+Traje:
+${traje.value}
+
+MEDIÇÕES
+
+Altura do nó:
+${alturaNo.value}
+
+Altura da vítima:
+${alturaVitima.value}
+
+Altura do suporte:
+${alturaSuporte.value}
 `;
 
-localStorage.setItem("resultado", texto);
-
-return texto;
-
 }
 
 /* =========================
-   GERAR PDF
+GERAR PDF SEM RODAPÉ
 ========================= */
 
-function gerarPDF(){
+async function gerarPDF(){
 
-const texto = gerar();
+const { jsPDF } = window.jspdf;
 
-const win = window.open('', '', 'width=800,height=600');
+const doc = new jsPDF({
+  orientation: "portrait",
+  unit: "mm",
+  format: "a4"
+});
 
-win.document.write(`
-<html>
-<head>
-<title>Registro</title>
+const texto = gerarTexto();
 
-<style>
-body {
-  font-family: Arial;
-  padding: 30px;
-}
+const margem = 15;
 
-pre {
-  white-space: pre-wrap;
-  font-family: Arial;
-}
-</style>
+const largura = 180;
 
-</head>
+const linhas =
+doc.splitTextToSize(
+  texto,
+  largura
+);
 
-<body>
+let y = 15;
 
-<pre>${texto}</pre>
+doc.setFont("courier");
+doc.setFontSize(11);
 
-</body>
-</html>
-`);
+linhas.forEach(linha => {
 
-win.document.close();
+  if(y > 280){
 
-win.print();
+    doc.addPage();
+
+    y = 15;
+  }
+
+  doc.text(
+    linha,
+    margem,
+    y
+  );
+
+  y += 6;
+
+});
+
+doc.save(
+  "registro_suicidio.pdf"
+);
 
 }
 
 /* =========================
-   LIMPAR DADOS
+LIMPAR DADOS
 ========================= */
 
 function limparDados(){
@@ -296,7 +397,9 @@ if(confirmar){
 
   localStorage.clear();
 
-  alert("Dados apagados com sucesso.");
+  alert(
+    "Dados apagados com sucesso."
+  );
 
   location.reload();
 }
@@ -304,11 +407,15 @@ if(confirmar){
 }
 
 /* =========================
-   SERVICE WORKER
+SERVICE WORKER
 ========================= */
 
-if ('serviceWorker' in navigator) {
-navigator.serviceWorker.register('sw.js');
+if('serviceWorker' in navigator){
+
+  navigator.serviceWorker.register(
+    'sw.js'
+  );
+
 }
 
 </script>
