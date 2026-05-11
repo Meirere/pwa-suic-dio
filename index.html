@@ -11,17 +11,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
 <style>
-body { font-family: Arial; padding: 15px; background:#f5f5f5;}
+body { font-family: Arial; padding: 15px; background:#f5f5f5; }
 h2 { margin-top:20px; }
-input, select, textarea { width:100%; padding:10px; margin:5px 0; }
-button { width:100%; padding:15px; margin-top:10px; background:#0d6efd; color:white; border:none; font-size:16px; }
+input, select, textarea { width:100%; padding:10px; margin:5px 0; box-sizing:border-box; }
+button { width:100%; padding:15px; margin-top:10px; background:#0d6efd; color:white; border:none; font-size:16px; border-radius:8px; }
+.btn-limpar { background:#6c757d; }
 #resultado { height:250px; }
+footer { text-align:center; margin-top:30px; color:gray; font-size:12px; }
 </style>
 </head>
 
 <body>
 
-<h2>📋 Dados Operacionais</h2>
+<h2>Dados Operacionais</h2>
 
 <input id="horaAcionamento" placeholder="Hora do acionamento">
 <input id="protocolo" placeholder="Protocolo CIODS">
@@ -46,8 +48,8 @@ button { width:100%; padding:15px; margin-top:10px; background:#0d6efd; color:wh
 <input id="matDelegado" placeholder="Matrícula do delegado">
 <input id="circunscricao" placeholder="Circunscrição">
 
+<h2>Local</h2>
 
-<h2>📍 Local</h2>
 <input id="data" placeholder="Data da perícia">
 <input id="endereco" placeholder="Endereço">
 <input id="gps" placeholder="GPS">
@@ -62,17 +64,18 @@ button { width:100%; padding:15px; margin-top:10px; background:#0d6efd; color:wh
 <input id="corredor" placeholder="corredor">
 <input id="cozinha" placeholder="cozinha">
 <input id="quintal" placeholder="quintal">
-<input id="terraco" placeholder="terraco">
+<input id="terraco" placeholder="terraço">
 <input id="banheiro" placeholder="banheiro">
 <input id="garagem" placeholder="garagem">
-<input id="outros_comodos" placeholder="outros_comodos">
+<input id="outros_comodos" placeholder="outros cômodos">
 <input id="ambiente" placeholder="Ambiente do cadáver">
 
 <textarea id="luta" placeholder="Sinais de luta"></textarea>
 <textarea id="arrombamento" placeholder="Arrombamento"></textarea>
 <textarea id="invasao" placeholder="Invasão"></textarea>
 
-<h2>⚙️ Dinâmica</h2>
+<h2>Dinâmica</h2>
+
 <select id="suspensao">
 <option>Completa</option>
 <option>Incompleta</option>
@@ -82,8 +85,10 @@ button { width:100%; padding:15px; margin-top:10px; background:#0d6efd; color:wh
 <input id="suporte" placeholder="Suporte utilizado">
 <input id="localNo" placeholder="Local do nó">
 
-<h2>🧍 Vítima</h2>
+<h2>Vítima</h2>
+
 <input id="vitima" placeholder="Nome da vítima">
+
 <select id="sexo">
 <option>masculino</option>
 <option>feminino</option>
@@ -95,21 +100,49 @@ button { width:100%; padding:15px; margin-top:10px; background:#0d6efd; color:wh
 <input id="altura" placeholder="Altura">
 <input id="traje" placeholder="Traje">
 
-<h2>📏 Medidas</h2>
+<h2>Medidas</h2>
+
 <input id="alturaNo" placeholder="Altura do nó">
 <input id="alturaVitima" placeholder="Altura da vítima">
 <input id="alturaSuporte" placeholder="Altura do suporte">
 
 <button onclick="gerar()">📋 GERAR REGISTRO</button>
 <button onclick="gerarPDF()">📄 GERAR PDF</button>
+<button class="btn-limpar" onclick="limparDados()">🗑️ LIMPAR DADOS</button>
 
 <textarea id="resultado"></textarea>
 
+<footer>
+  © Perito Meirere
+</footer>
+
 <script>
+/* =========================
+   SALVAMENTO AUTOMÁTICO
+========================= */
+
+const campos = document.querySelectorAll("input, select, textarea");
+
+campos.forEach(campo => {
+  const valorSalvo = localStorage.getItem(campo.id);
+
+  if (valorSalvo !== null) {
+    campo.value = valorSalvo;
+  }
+
+  campo.addEventListener("input", () => {
+    localStorage.setItem(campo.id, campo.value);
+  });
+});
+
+/* =========================
+   GERAR REGISTRO
+========================= */
+
 function gerar(){
 
 const texto = `
-REGISTRO DE INFORMAÇÕES DE CAMPO
+REGISTRO DE INFORMAÇÕES DE CAMPO - SUICÍDIO
 
 Dados operacionais:
 - Delegado: ${delegado.value} (mat. ${matDelegado.value})
@@ -125,10 +158,7 @@ Local:
 - Coordenadas: ${gps.value}
 - Data: ${data.value}
 - Estrutura: alvenaria ${alvenaria.value}, piso ${piso.value}, telha ${telha.value}, reboco ${reboco.value}
-- Cômodos: Sala: ${sala.value}, Quartos: ${quartos.value}, Corredor: ${corredor.value}, Cozinha: ${cozinha.value}, Quintal: ${quintal.value}, Terraço: ${terraco.value}, Banheiro: ${banheiro.value}, Garagem: ${garagem.value} e ${outros_comodos.value}.
-
-
-<input id="ambiente" placeholder="Ambiente do cadáver">
+- Cômodos: Sala: ${salas.value}, Quartos: ${quartos.value}, Corredor: ${corredor.value}, Cozinha: ${cozinha.value}, Quintal: ${quintal.value}, Terraço: ${terraco.value}, Banheiro: ${banheiro.value}, Garagem: ${garagem.value} e ${outros_comodos.value}.
 - Ambiente do cadáver: ${ambiente.value}
 
 Vestígios e condições:
@@ -156,7 +186,12 @@ Medições:
 `;
 
 document.getElementById("resultado").value = texto;
+localStorage.setItem("resultado", texto);
 }
+
+/* =========================
+   GERAR PDF
+========================= */
 
 function gerarPDF(){
 gerar();
@@ -170,6 +205,7 @@ win.document.write(`
 <title>Registro</title>
 <style>
 body { font-family: Arial; padding: 30px; }
+pre { white-space: pre-wrap; font-family: Arial; }
 </style>
 </head>
 <body>
@@ -180,6 +216,26 @@ body { font-family: Arial; padding: 30px; }
 win.document.close();
 win.print();
 }
+
+/* =========================
+   LIMPAR DADOS
+========================= */
+
+function limparDados(){
+
+const confirmar = confirm("Tem certeza que deseja apagar todos os dados preenchidos?");
+
+if(confirmar){
+  localStorage.clear();
+  alert("Dados apagados com sucesso.");
+  location.reload();
+}
+
+}
+
+/* =========================
+   SERVICE WORKER
+========================= */
 
 if ('serviceWorker' in navigator) {
 navigator.serviceWorker.register('sw.js');
