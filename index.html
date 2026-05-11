@@ -11,19 +11,52 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
 <style>
-body { font-family: Arial; padding: 15px; background:#f5f5f5; }
-h2 { margin-top:20px; }
-input, select, textarea { width:100%; padding:10px; margin:5px 0; box-sizing:border-box; }
-button { width:100%; padding:15px; margin-top:10px; background:#0d6efd; color:white; border:none; font-size:16px; border-radius:8px; }
-.btn-limpar { background:#6c757d; }
+body {
+  font-family: Arial;
+  padding: 15px;
+  background:#f5f5f5;
+}
 
-footer { text-align:center; margin-top:30px; color:gray; font-size:12px; }
+h2 {
+  margin-top:20px;
+}
+
+input, select, textarea {
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  box-sizing:border-box;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+button {
+  width:100%;
+  padding:15px;
+  margin-top:10px;
+  background:#0d6efd;
+  color:white;
+  border:none;
+  font-size:16px;
+  border-radius:8px;
+}
+
+.btn-limpar {
+  background:#6c757d;
+}
+
+footer {
+  text-align:center;
+  margin-top:30px;
+  color:gray;
+  font-size:12px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>Dados Operacionais</h2>
+<h2>📋 Dados Operacionais</h2>
 
 <input id="horaAcionamento" placeholder="Hora do acionamento">
 <input id="protocolo" placeholder="Protocolo CIODS">
@@ -48,7 +81,7 @@ footer { text-align:center; margin-top:30px; color:gray; font-size:12px; }
 <input id="matDelegado" placeholder="Matrícula do delegado">
 <input id="circunscricao" placeholder="Circunscrição">
 
-<h2>Local</h2>
+<h2>📍 Local</h2>
 
 <input id="data" placeholder="Data da perícia">
 <input id="endereco" placeholder="Endereço">
@@ -59,22 +92,23 @@ footer { text-align:center; margin-top:30px; color:gray; font-size:12px; }
 <input id="telha" placeholder="Tipo de telha">
 <input id="reboco" placeholder="Tipo de reboco">
 
-<input id="salas" placeholder="sala">
-<input id="quartos" placeholder="quartos">
-<input id="corredor" placeholder="corredor">
-<input id="cozinha" placeholder="cozinha">
-<input id="quintal" placeholder="quintal">
-<input id="terraco" placeholder="terraço">
-<input id="banheiro" placeholder="banheiro">
-<input id="garagem" placeholder="garagem">
-<input id="outros_comodos" placeholder="outros cômodos">
+<input id="salas" placeholder="Sala">
+<input id="quartos" placeholder="Quartos">
+<input id="corredor" placeholder="Corredor">
+<input id="cozinha" placeholder="Cozinha">
+<input id="quintal" placeholder="Quintal">
+<input id="terraco" placeholder="Terraço">
+<input id="banheiro" placeholder="Banheiro">
+<input id="garagem" placeholder="Garagem">
+<input id="outros_comodos" placeholder="Outros cômodos">
+
 <input id="ambiente" placeholder="Ambiente do cadáver">
 
 <textarea id="luta" placeholder="Sinais de luta"></textarea>
 <textarea id="arrombamento" placeholder="Arrombamento"></textarea>
 <textarea id="invasao" placeholder="Invasão"></textarea>
 
-<h2>Dinâmica</h2>
+<h2>⚙️ Dinâmica</h2>
 
 <select id="suspensao">
 <option>Completa</option>
@@ -85,7 +119,7 @@ footer { text-align:center; margin-top:30px; color:gray; font-size:12px; }
 <input id="suporte" placeholder="Suporte utilizado">
 <input id="localNo" placeholder="Local do nó">
 
-<h2>Vítima</h2>
+<h2>🧍 Vítima</h2>
 
 <input id="vitima" placeholder="Nome da vítima">
 
@@ -100,22 +134,24 @@ footer { text-align:center; margin-top:30px; color:gray; font-size:12px; }
 <input id="altura" placeholder="Altura">
 <input id="traje" placeholder="Traje">
 
-<h2>Medidas</h2>
+<h2>📏 Medidas</h2>
 
 <input id="alturaNo" placeholder="Altura do nó">
 <input id="alturaVitima" placeholder="Altura da vítima">
 <input id="alturaSuporte" placeholder="Altura do suporte">
 
-
 <button onclick="gerarPDF()">📄 GERAR PDF</button>
-<button class="btn-limpar" onclick="limparDados()">🗑️ LIMPAR DADOS</button>
 
+<button class="btn-limpar" onclick="limparDados()">
+🗑️ LIMPAR DADOS
+</button>
 
 <footer>
-  © Perito Meirere
+© Perito Meirere
 </footer>
 
 <script>
+
 /* =========================
    SALVAMENTO AUTOMÁTICO
 ========================= */
@@ -123,6 +159,7 @@ footer { text-align:center; margin-top:30px; color:gray; font-size:12px; }
 const campos = document.querySelectorAll("input, select, textarea");
 
 campos.forEach(campo => {
+
   const valorSalvo = localStorage.getItem(campo.id);
 
   if (valorSalvo !== null) {
@@ -132,10 +169,11 @@ campos.forEach(campo => {
   campo.addEventListener("input", () => {
     localStorage.setItem(campo.id, campo.value);
   });
+
 });
 
 /* =========================
-   GERAR REGISTRO
+   GERAR TEXTO
 ========================= */
 
 function gerar(){
@@ -157,7 +195,18 @@ Local:
 - Coordenadas: ${gps.value}
 - Data: ${data.value}
 - Estrutura: alvenaria ${alvenaria.value}, piso ${piso.value}, telha ${telha.value}, reboco ${reboco.value}
-- Cômodos: Sala: ${salas.value}, Quartos: ${quartos.value}, Corredor: ${corredor.value}, Cozinha: ${cozinha.value}, Quintal: ${quintal.value}, Terraço: ${terraco.value}, Banheiro: ${banheiro.value}, Garagem: ${garagem.value} e ${outros_comodos.value}.
+
+- Cômodos:
+Sala: ${salas.value}
+Quartos: ${quartos.value}
+Corredor: ${corredor.value}
+Cozinha: ${cozinha.value}
+Quintal: ${quintal.value}
+Terraço: ${terraco.value}
+Banheiro: ${banheiro.value}
+Garagem: ${garagem.value}
+Outros: ${outros_comodos.value}
+
 - Ambiente do cadáver: ${ambiente.value}
 
 Vestígios e condições:
@@ -184,8 +233,10 @@ Medições:
 - Altura do suporte: ${alturaSuporte.value}
 `;
 
-document.getElementById("resultado").value = texto;
 localStorage.setItem("resultado", texto);
+
+return texto;
+
 }
 
 /* =========================
@@ -193,27 +244,42 @@ localStorage.setItem("resultado", texto);
 ========================= */
 
 function gerarPDF(){
-gerar();
 
-const texto = document.getElementById("resultado").value;
+const texto = gerar();
 
 const win = window.open('', '', 'width=800,height=600');
+
 win.document.write(`
 <html>
 <head>
 <title>Registro</title>
+
 <style>
-body { font-family: Arial; padding: 30px; }
-pre { white-space: pre-wrap; font-family: Arial; }
+body {
+  font-family: Arial;
+  padding: 30px;
+}
+
+pre {
+  white-space: pre-wrap;
+  font-family: Arial;
+}
 </style>
+
 </head>
+
 <body>
+
 <pre>${texto}</pre>
+
 </body>
 </html>
 `);
+
 win.document.close();
+
 win.print();
+
 }
 
 /* =========================
@@ -222,11 +288,16 @@ win.print();
 
 function limparDados(){
 
-const confirmar = confirm("Tem certeza que deseja apagar todos os dados preenchidos?");
+const confirmar = confirm(
+"Tem certeza que deseja apagar todos os dados preenchidos?"
+);
 
 if(confirmar){
+
   localStorage.clear();
+
   alert("Dados apagados com sucesso.");
+
   location.reload();
 }
 
@@ -239,6 +310,7 @@ if(confirmar){
 if ('serviceWorker' in navigator) {
 navigator.serviceWorker.register('sw.js');
 }
+
 </script>
 
 </body>
