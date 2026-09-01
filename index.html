@@ -19,7 +19,39 @@ body{
   padding:15px;
   background:#f5f5f5;
 }
+.foto-container{
+  margin-top:20px;
+}
 
+#fotoPreview{
+  display:none;
+  width:100%;
+  max-height:400px;
+  object-fit:contain;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  background:white;
+}
+
+.acoes-foto{
+  display:none;
+  gap:10px;
+  margin-top:10px;
+}
+
+.acoes-foto button{
+  flex:1;
+}
+
+.btn-excluir-foto{
+  background:#dc3545;
+}
+
+.btn-refazer-foto{
+  background:#6c757d;
+}
+  
 h2{
   margin-top:20px;
   background:#0d6efd;
@@ -232,6 +264,50 @@ button{
 <label>Altura do suporte</label>
 <input id="alturaSuporte" type="text">
 
+<h2>Registro Fotográfico</h2>
+
+<div class="foto-container">
+
+  <input
+    id="fotoInput"
+    type="file"
+    accept="image/*"
+    capture="environment"
+    hidden
+  >
+
+  <button
+    type="button"
+    id="btnTirarFoto"
+    onclick="abrirCamera()"
+  >
+    📷 TIRAR FOTO
+  </button>
+
+  <img id="fotoPreview">
+
+  <div id="acoesFoto" class="acoes-foto">
+
+    <button
+      type="button"
+      class="btn-refazer-foto"
+      onclick="refazerFoto()"
+    >
+      🔄 REFAZER
+    </button>
+
+    <button
+      type="button"
+      class="btn-excluir-foto"
+      onclick="excluirFoto()"
+    >
+      🗑️ EXCLUIR
+    </button>
+
+  </div>
+
+</div>
+
 <button type="button" onclick="gerarPDF()">
 📄 GERAR PDF
 </button>
@@ -245,7 +321,9 @@ button{
 SALVAMENTO AUTOMÁTICO
 ========================= */
 
-const campos = document.querySelectorAll("input, select, textarea");
+const campos = document.querySelectorAll(
+  'input:not([type="file"]), select, textarea'
+);
 
 campos.forEach(campo => {
   const valorSalvo = localStorage.getItem(campo.id);
@@ -259,6 +337,112 @@ campos.forEach(campo => {
   });
 });
 
+/* =========================
+FOTOGRAFIA
+========================= */
+
+const fotoInput = document.getElementById("fotoInput");
+const fotoPreview = document.getElementById("fotoPreview");
+const btnTirarFoto = document.getElementById("btnTirarFoto");
+const acoesFoto = document.getElementById("acoesFoto");
+
+let fotoBase64 = null;
+
+function abrirCamera(){
+  fotoInput.value = "";
+  fotoInput.click();
+}
+
+fotoInput.addEventListener("change", function(){
+
+  const arquivo = this.files[0];
+
+  if(!arquivo){
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(event){
+
+    const imagem = new Image();
+
+    imagem.onload = function(){
+
+      const canvas = document.createElement("canvas");
+
+      const tamanhoMaximo = 1600;
+
+      let largura = imagem.width;
+      let altura = imagem.height;
+
+      if(largura > altura && largura > tamanhoMaximo){
+
+        altura = altura * tamanhoMaximo / largura;
+        largura = tamanhoMaximo;
+
+      }else if(altura > tamanhoMaximo){
+
+        largura = largura * tamanhoMaximo / altura;
+        altura = tamanhoMaximo;
+      }
+
+      canvas.width = largura;
+      canvas.height = altura;
+
+      const ctx = canvas.getContext("2d");
+
+      ctx.drawImage(
+        imagem,
+        0,
+        0,
+        largura,
+        altura
+      );
+
+      /*
+      A fotografia é convertida para JPEG
+      com qualidade de 85%.
+      */
+
+      fotoBase64 = canvas.toDataURL(
+        "image/jpeg",
+        0.85
+      );
+
+      fotoPreview.src = fotoBase64;
+
+      fotoPreview.style.display = "block";
+      acoesFoto.style.display = "flex";
+      btnTirarFoto.style.display = "none";
+    };
+
+    imagem.src = event.target.result;
+  };
+
+  reader.readAsDataURL(arquivo);
+});
+
+
+function refazerFoto(){
+
+  fotoInput.value = "";
+  fotoInput.click();
+
+}
+
+
+function excluirFoto(){
+
+  fotoBase64 = null;
+
+  fotoInput.value = "";
+  fotoPreview.src = "";
+
+  fotoPreview.style.display = "none";
+  acoesFoto.style.display = "none";
+  btnTirarFoto.style.display = "block";
+}
 /* =========================
 GERAR PDF DINÂMICO
 ========================= */
@@ -319,12 +503,71 @@ async function gerarPDF(){
 
   });
 
-  const data =
-    document.getElementById("data").value || "sem_data";
+ /* =========================
+INSERIR FOTOGRAFIA NO PDF
+========================= */
 
-  doc.save(`registro_suicidio_${data}.pdf`);
+if(fotoBase64){
+
+  doc.addPage();
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+
+  doc.text(
+    "REGISTRO FOTOGRÁFICO",
+    105,
+    15,
+    { align:"center" }
+  );
+
+  /*
+  Descobre as proporções da fotografia
+  para não deformá-la no PDF.
+  */
+
+  const propriedades =
+    doc.getImageProperties(fotoBase64);
+
+  const larguraMaxima = 180;
+  const alturaMaxima = 245;
+
+  let larguraFoto = larguraMaxima;
+
+  let alturaFoto =
+    propriedades.height *
+    larguraFoto /
+    propriedades.width;
+
+  if(alturaFoto > alturaMaxima){
+
+    alturaFoto = alturaMaxima;
+
+    larguraFoto =
+      propriedades.width *
+      alturaFoto /
+      propriedades.height;
+  }
+
+  const x =
+    (210 - larguraFoto) / 2;
+
+  doc.addImage(
+    fotoBase64,
+    "JPEG",
+    x,
+    25,
+    larguraFoto,
+    alturaFoto
+  );
 }
 
+
+const data =
+  document.getElementById("data").value || "sem_data";
+
+doc.save(`registro_suicidio_${data}.pdf`);
+}
 /* =========================
 LIMPAR DADOS
 ========================= */
